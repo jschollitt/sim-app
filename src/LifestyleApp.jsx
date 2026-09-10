@@ -1,11 +1,88 @@
+// Compiled by a bundler (Vite/esbuild/webpack + @babel/preset-react), not by
+// Babel's in-browser transform. Because there is now a build step, npm packages
+// can be imported here — the local icon set and MiniLineChart below are kept
+// only so the rendered output is unchanged; swap them for lucide-react and
+// recharts whenever you want.
 import { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  Home, CheckSquare, BookOpen, Activity, CalendarDays, Plus,
-  Droplet, Dumbbell, Utensils, Check, ChevronLeft, ChevronRight, ChevronDown,
-  Trash2, Flame, ListChecks, Sparkles, Cloud, Sun, CloudSun, CloudRain,
-  CloudSnow, CloudLightning, CloudFog, Scale, Moon, History, User
-} from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+
+// ---------- tiny local icon set (stand-in for lucide-react) ----------
+function IconBase({ size = 20, color = "currentColor", strokeWidth = 1.8, style, children }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color}
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>
+      {children}
+    </svg>
+  );
+}
+const Home = (p) => <IconBase {...p}><path d="M4 11.5 12 4l8 7.5" /><path d="M6 10.5V19a1 1 0 0 0 1 1h3v-6h4v6h3a1 1 0 0 0 1-1v-8.5" /></IconBase>;
+const CheckSquare = (p) => <IconBase {...p}><rect x="3" y="3" width="18" height="18" rx="3" /><polyline points="8,12.5 11,15.5 16,9" /></IconBase>;
+const BookOpen = (p) => <IconBase {...p}><path d="M12 6c-2-1.5-5-2-8-1v13c3-1 6-.5 8 1 2-1.5 5-2 8-1V5c-3-1-6-.5-8 1Z" /><path d="M12 6v13" /></IconBase>;
+const Activity = (p) => <IconBase {...p}><polyline points="3,12 8,12 10,6 14,18 16,12 21,12" /></IconBase>;
+const CalendarDays = (p) => <IconBase {...p}><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18" /><path d="M8 3v4M16 3v4" /><circle cx="8" cy="14" r="1" /><circle cx="12" cy="14" r="1" /><circle cx="16" cy="14" r="1" /></IconBase>;
+const Plus = (p) => <IconBase {...p}><path d="M12 5v14M5 12h14" /></IconBase>;
+const Droplet = (p) => <IconBase {...p}><path d="M12 3c4 5 7 8.5 7 12a7 7 0 0 1-14 0c0-3.5 3-7 7-12Z" /></IconBase>;
+const Dumbbell = (p) => <IconBase {...p}><rect x="2" y="9" width="3" height="6" rx="1" /><rect x="19" y="9" width="3" height="6" rx="1" /><path d="M6 12h12" /><path d="M6 9v6M18 9v6" /></IconBase>;
+const Utensils = (p) => <IconBase {...p}><path d="M5 3v6M7 3v6M9 3v6" /><path d="M7 9v12" /><path d="M17 3v7c0 1.5-1 2.5-2 3v9" /></IconBase>;
+const Check = (p) => <IconBase {...p}><polyline points="5,13 10,18 19,7" /></IconBase>;
+const ChevronLeft = (p) => <IconBase {...p}><polyline points="15,5 8,12 15,19" /></IconBase>;
+const ChevronRight = (p) => <IconBase {...p}><polyline points="9,5 16,12 9,19" /></IconBase>;
+const ChevronDown = (p) => <IconBase {...p}><polyline points="5,9 12,16 19,9" /></IconBase>;
+const Trash2 = (p) => <IconBase {...p}><path d="M4 7h16" /><path d="M9 7V4h6v3" /><path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13" /><path d="M10 11v6M14 11v6" /></IconBase>;
+const Flame = (p) => <IconBase {...p}><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1-1-1.5-1-3 2 1 3 3 3 5a5 5 0 0 1-10 0c0-5 3-6 5-11Z" /></IconBase>;
+const ListChecks = (p) => <IconBase {...p}><polyline points="3,7 5,9 9,4" /><path d="M12 6h9" /><polyline points="3,15 5,17 9,12" /><path d="M12 14h9" /></IconBase>;
+const Sparkles = (p) => <IconBase {...p}><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5Z" /><path d="M19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7Z" /></IconBase>;
+const Cloud = (p) => <IconBase {...p}><path d="M7 18a4 4 0 1 1 .7-7.9 5 5 0 0 1 9.6 1.7A3.5 3.5 0 0 1 17 18H7Z" /></IconBase>;
+const Sun = (p) => <IconBase {...p}><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></IconBase>;
+const CloudSun = (p) => <IconBase {...p}><circle cx="7.5" cy="6.5" r="2" /><path d="M7.5 2.7v1.2M3.8 6.5H2.6M4.6 3.6l.9.9M10.4 3.6l-.9.9" /><path d="M6.5 18A4 4 0 1 1 7 10.2a5 5 0 0 1 9.6 1.6A3.5 3.5 0 0 1 16.5 18h-10Z" /></IconBase>;
+const CloudRain = (p) => <IconBase {...p}><path d="M7 16a4 4 0 1 1 .7-7.9 5 5 0 0 1 9.6 1.7A3.5 3.5 0 0 1 17 16H7Z" /><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2" /></IconBase>;
+const CloudSnow = (p) => <IconBase {...p}><path d="M7 15a4 4 0 1 1 .7-7.9 5 5 0 0 1 9.6 1.7A3.5 3.5 0 0 1 17 15H7Z" /><path d="M8 19h.01M12 19h.01M16 19h.01M8 21.5h.01M12 21.5h.01M16 21.5h.01" /></IconBase>;
+const CloudLightning = (p) => <IconBase {...p}><path d="M7 14a4 4 0 1 1 .7-7.9 5 5 0 0 1 9.6 1.7A3.5 3.5 0 0 1 17 14H7Z" /><path d="M13 13l-3 5h3l-1 4 4-6h-3Z" fill={p.color || "currentColor"} stroke="none" /></IconBase>;
+const CloudFog = (p) => <IconBase {...p}><path d="M7 11a4 4 0 1 1 .5-7.9A5 5 0 0 1 17 4.5 3.5 3.5 0 0 1 16.5 11H7Z" /><path d="M4 15h16M6 18h12M8 21h8" /></IconBase>;
+const Scale = (p) => <IconBase {...p}><path d="M12 3v4" /><path d="M5 7h14" /><path d="M5 7 3 12a2.5 2.5 0 0 0 5 0Z" /><path d="M19 7l2 5a2.5 2.5 0 0 1-5 0Z" /><path d="M8 21h8" /><path d="M12 7v14" /></IconBase>;
+const Moon = (p) => <IconBase {...p}><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" /></IconBase>;
+const History = (p) => <IconBase {...p}><path d="M3 12a9 9 0 1 0 3-6.7" /><polyline points="3,4 3,9 8,9" /><polyline points="12,7 12,12 16,14" /></IconBase>;
+const User = (p) => <IconBase {...p}><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 4-6 8-6s8 2 8 6" /></IconBase>;
+
+// ---------- tiny local line chart (stand-in for recharts) ----------
+function MiniLineChart({ data, color = "#D14D7C", height = 90 }) {
+  const width = 280;
+  const pad = 8;
+  const values = data.map((d) => d.kg);
+  const min = Math.min(...values) - 1;
+  const max = Math.max(...values) + 1;
+  const span = Math.max(0.5, max - min);
+  const stepX = (width - pad * 2) / Math.max(1, data.length - 1);
+  const points = data.map((d, i) => {
+    const x = pad + i * stepX;
+    const y = pad + (1 - (d.kg - min) / span) * (height - pad * 2);
+    return { x, y, label: d.date, kg: d.kg };
+  });
+  const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} preserveAspectRatio="none">
+      <path d={path} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      {points.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="2.5" fill={color} />)}
+    </svg>
+  );
+}
+
+// ---------- persistent storage (browser localStorage — works on any static host) ----------
+function loadKey(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw !== null) return JSON.parse(raw);
+    return fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
+function saveKey(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {
+    console.error("save failed", key, e);
+  }
+}
 
 // ---------- helpers ----------
 const todayStr = () => {
@@ -77,30 +154,13 @@ const getMoonPhase = (date = new Date()) => {
   return { name: names[index] };
 };
 
-async function loadKey(key, fallback) {
-  try {
-    const res = await window.storage.get(key, false);
-    if (res && res.value) return JSON.parse(res.value);
-    return fallback;
-  } catch (e) {
-    return fallback;
-  }
-}
-async function saveKey(key, data) {
-  try {
-    await window.storage.set(key, JSON.stringify(data), false);
-  } catch (e) {
-    console.error("save failed", key, e);
-  }
-}
-
 const BLANK_HABITS = { habits: [], logs: {} };
 const BLANK_JOURNAL = { entries: [], currentBook: "" };
 const BLANK_FITNESS = { water: {}, exercise: [], meals: [], weights: [] };
 const BLANK_PLANNER = { todos: [], goals: [], events: [], todoHistory: [] };
 const BLANK_PROFILE = { name: "", age: "", heightCm: "", weightKg: "", activityLevel: "", goal: "", waterGoal: 6, auraColor: "blush" };
 
-export default function LifestyleApp() {
+function LifestyleApp() {
   const [tab, setTab] = useState("today");
   const [ready, setReady] = useState(false);
 
@@ -134,11 +194,11 @@ export default function LifestyleApp() {
   const updatePlanner = useCallback((next) => { setPlannerData(next); saveKey("planner-data", next); }, []);
   const updateProfile = useCallback((next) => { setProfileData(next); saveKey("profile-data", next); }, []);
 
-  const resetAllData = useCallback(async () => {
+  const resetAllData = useCallback(() => {
     const keys = ["habits-data", "journal-data", "fitness-data", "planner-data", "profile-data"];
-    for (const k of keys) {
-      try { await window.storage.delete(k, false); } catch (e) { /* key may not exist yet */ }
-    }
+    keys.forEach((k) => {
+      try { localStorage.removeItem(k); } catch (e) { /* ignore */ }
+    });
     setHabitsData(BLANK_HABITS);
     setJournalData(BLANK_JOURNAL);
     setFitnessData(BLANK_FITNESS);
@@ -491,7 +551,7 @@ function LogCalendar({ color, getDayItems, getIntensity, today, emptyLabel = "No
 }
 
 // ---------- TODAY ----------
-function TodayTab({ today, habitsData, updateHabits, journalData, fitnessData, updateFitness, plannerData, profileData, exportData, resetAllData, setTab }) {
+function TodayTab({ today, habitsData, updateHabits, journalData, updateJournal, fitnessData, updateFitness, plannerData, updatePlanner, profileData, exportData, resetAllData, setTab }) {
   const [confirmingReset, setConfirmingReset] = useState(false);
   const doneToday = (habitsData.logs[today] || []).length;
   const totalHabits = habitsData.habits.length;
@@ -1201,15 +1261,8 @@ function FitnessTab({ today, data, update, waterGoal = 6 }) {
             <Scale size={22} color="var(--rose)" strokeWidth={1.6} />
           </div>
           {chartData.length > 1 && (
-            <div style={{ height: 100, margin: "0 -6px 10px" }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <XAxis dataKey="date" tick={{ fontSize: 9, fill: "var(--muted)" }} axisLine={false} tickLine={false} />
-                  <YAxis hide domain={["dataMin - 1", "dataMax + 1"]} />
-                  <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid var(--line)" }} />
-                  <Line type="monotone" dataKey="kg" stroke="var(--rose)" strokeWidth={2} dot={{ r: 2.5 }} />
-                </LineChart>
-              </ResponsiveContainer>
+            <div style={{ margin: "0 0 12px" }}>
+              <MiniLineChart data={chartData} color="var(--rose)" />
             </div>
           )}
           <div className="lf-row">
@@ -1557,3 +1610,5 @@ function ProfileTab({ data, update, setTab }) {
     </>
   );
 }
+
+export default LifestyleApp;
